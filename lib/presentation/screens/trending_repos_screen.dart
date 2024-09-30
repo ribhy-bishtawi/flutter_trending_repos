@@ -167,32 +167,44 @@ class _TrendingReposScreenState extends State<TrendingReposScreen> {
               ),
               (viewmodel.isLoading && viewmodel.filteredRepos.isEmpty)
                   ? const Center(child: CircularProgressIndicator())
-                  : Expanded(
-                      child: ListView.builder(
-                        controller: _scrollController,
-                        itemCount: viewmodel.filteredRepos.length +
-                            (viewmodel.isLoading ? 1 : 0),
-                        itemBuilder: (BuildContext context, int index) {
-                          if (index == viewmodel.filteredRepos.length &&
-                              viewmodel.isLoading) {
-                            return Center(
-                              child: viewmodel.isLoading
-                                  ? Padding(
-                                      padding:
-                                          EdgeInsets.symmetric(vertical: 20.h),
-                                      child: const CircularProgressIndicator(),
-                                    )
-                                  : const SizedBox.shrink(),
-                            );
-                          }
+                  : viewmodel.filteredRepos.isEmpty
+                      ? Expanded(
+                          child: Center(
+                            child: Text(
+                              textAlign: TextAlign.center,
+                              "No repositories found matching your filters.",
+                              style: AppTextStyle.headline,
+                            ),
+                          ),
+                        )
+                      : Expanded(
+                          child: ListView.builder(
+                            controller: _scrollController,
+                            itemCount: viewmodel.filteredRepos.length +
+                                (viewmodel.isLoading ? 1 : 0),
+                            itemBuilder: (BuildContext context, int index) {
+                              if (index == viewmodel.filteredRepos.length &&
+                                  viewmodel.isLoading) {
+                                return Center(
+                                  child: viewmodel.isLoading
+                                      ? Padding(
+                                          padding: EdgeInsets.symmetric(
+                                              vertical: 20.h),
+                                          child:
+                                              const CircularProgressIndicator(),
+                                        )
+                                      : const SizedBox.shrink(),
+                                );
+                              }
 
-                          final repo = viewmodel.filteredRepos[index];
-                          return RepoCard(
-                              repo: repo,
-                              key: ObjectKey(viewmodel.filteredRepos[index]));
-                        },
-                      ),
-                    ),
+                              final repo = viewmodel.filteredRepos[index];
+                              return RepoCard(
+                                  repo: repo,
+                                  key: ObjectKey(
+                                      viewmodel.filteredRepos[index]));
+                            },
+                          ),
+                        ),
             ],
           ));
     });
