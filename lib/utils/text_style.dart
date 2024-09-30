@@ -8,4 +8,16 @@ class AppTextStyle {
     fontWeight: FontWeight.bold,
     color: Palette.whiteColor,
   );
+
+  static TextStyle primaryText = TextStyle(
+    fontSize: 24.0.sp,
+    fontWeight: FontWeight.bold,
+    color: Palette.header,
+  );
+
+  static TextStyle secondaryText = TextStyle(
+    fontSize: 16.0.sp,
+    fontWeight: FontWeight.w400,
+    color: Palette.secondaryText,
+  );
 }
