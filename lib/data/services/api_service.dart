@@ -65,11 +65,10 @@ class NetworkHelper {
       response = await _dio.get(url,
           queryParameters: queryParameters, options: Options(headers: headers));
 
-      ErrorType errorType = ErrorHelper.getErrorType(response.statusCode);
-
       if (response.statusCode == HttpStatusCode.success) {
         data = response.data;
       } else {
+        ErrorType errorType = ErrorHelper.getErrorType(response.statusCode);
         errorMessage = ErrorHelper.getErrorMessage(errorType);
       }
     } on DioException catch (e) {

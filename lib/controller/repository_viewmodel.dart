@@ -7,6 +7,7 @@ import 'package:trending_repositories/data/models/repository_model.dart';
 import 'package:trending_repositories/data/services/api_constants.dart';
 import 'package:trending_repositories/data/services/api_service.dart';
 import 'package:trending_repositories/data/services/custom_response.dart';
+import 'package:trending_repositories/data/services/status_code.dart';
 
 enum TimeFilter { day, week, month }
 
@@ -61,30 +62,6 @@ class RepositoryViewmodel extends ChangeNotifier {
     notifyListeners();
   }
 
-  void searchRepos(String query) {
-    if (query.isEmpty) {
-      _filteredRepos = repos;
-    } else {
-      _filteredRepos = repos
-          .where(
-              (repo) => repo.name.toLowerCase().contains(query.toLowerCase()))
-          .toList();
-    }
-    notifyListeners();
-  }
-
-  void searchFavoriteRepos(String query) {
-    if (query.isEmpty) {
-      _filteredFavoriteRepos = _favoriteRepos;
-    } else {
-      _filteredFavoriteRepos = _favoriteRepos
-          .where(
-              (repo) => repo.name.toLowerCase().contains(query.toLowerCase()))
-          .toList();
-    }
-    notifyListeners(); // Notify the UI to update
-  }
-
   Future<List<Repository>> fetchRepos(
       {required int page, required TimeFilter filter}) async {
     CustomResponse customResponse;
@@ -118,15 +95,14 @@ class RepositoryViewmodel extends ChangeNotifier {
     };
     const String url = ApiConstants.baseUrl + ApiConstants.searchRepositories;
 
-    try {
-      customResponse =
-          await _networkHelper.get(url: url, queryParameters: queryParams);
+    customResponse =
+        await _networkHelper.get(url: url, queryParameters: queryParams);
+    if (customResponse.statusCode == HttpStatusCode.success) {
       _tempRepos = (customResponse.data["items"] as List).map((repo) {
         return Repository.fromMap(repo);
       }).toList();
-    } catch (e) {
-      _errorMessage = e.toString();
-      print("$errorMessage");
+    } else {
+      _errorMessage = customResponse.errorMessage;
     }
     _isLoading = false;
     notifyListeners();
@@ -168,6 +144,30 @@ class RepositoryViewmodel extends ChangeNotifier {
       _filteredFavoriteRepos = _favoriteRepos;
     }
     notifyListeners();
+  }
+
+  void searchRepos(String query) {
+    if (query.isEmpty) {
+      _filteredRepos = repos;
+    } else {
+      _filteredRepos = repos
+          .where(
+              (repo) => repo.name.toLowerCase().contains(query.toLowerCase()))
+          .toList();
+    }
+    notifyListeners();
+  }
+
+  void searchFavoriteRepos(String query) {
+    if (query.isEmpty) {
+      _filteredFavoriteRepos = _favoriteRepos;
+    } else {
+      _filteredFavoriteRepos = _favoriteRepos
+          .where(
+              (repo) => repo.name.toLowerCase().contains(query.toLowerCase()))
+          .toList();
+    }
+    notifyListeners(); // Notify the UI to update
   }
 
   bool isFavorite(Repository repo) {
