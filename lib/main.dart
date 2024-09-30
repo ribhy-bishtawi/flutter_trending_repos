@@ -32,6 +32,7 @@ class MyApp extends StatelessWidget {
         designSize: const Size(390, 844),
         builder: (context, child) {
           return MaterialApp(
+            debugShowCheckedModeBanner: false,
             title: 'Flutter Demo',
             theme: ThemeData(
               scaffoldBackgroundColor: Palette.whiteColor,

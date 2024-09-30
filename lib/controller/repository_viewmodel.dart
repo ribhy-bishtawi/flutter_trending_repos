@@ -12,16 +12,45 @@ class RepositoryViewmodel extends ChangeNotifier {
 
   bool _isLoading = false;
   String? _errorMessage;
-  List<Repository>? _repos;
+  List<Repository> _repos = [];
 
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
-  List<Repository>? get repos => _repos;
+  List<Repository> get repos => _repos;
 
-  Future<void> getRepos(
-    TimeFilter filter,
-  ) async {
+  int currentPage = 1;
+
+  Future<void> getRepos(TimeFilter filter) async {
+    _isLoading = true;
+    _repos = [];
+    notifyListeners();
+
+    _repos = await fetchRepos(page: 1, filter: filter);
+    currentPage = 1;
+    _isLoading = false;
+    notifyListeners();
+  }
+
+  Future<void> loadMoreRepos() async {
+    if (_isLoading) return;
+
+    _isLoading = true;
+    notifyListeners();
+    List<Repository> moreRepos =
+        await fetchRepos(page: currentPage + 1, filter: TimeFilter.day);
+    if (moreRepos.isNotEmpty) {
+      repos.addAll(moreRepos);
+      currentPage++;
+    }
+
+    _isLoading = false;
+    notifyListeners();
+  }
+
+  Future<List<Repository>> fetchRepos(
+      {required int page, required TimeFilter filter}) async {
     CustomResponse customResponse;
+    List<Repository> _tempRepos = [];
     _errorMessage = null;
     _isLoading = true;
     DateTime now = DateTime.now();
@@ -47,13 +76,14 @@ class RepositoryViewmodel extends ChangeNotifier {
       'sort': 'stars',
       'order': 'desc',
       'q': 'created:>$createdSince',
+      'page': page
     };
     const String url = ApiConstants.baseUrl + ApiConstants.searchRepositories;
 
     try {
       customResponse =
           await _networkHelper.get(url: url, queryParameters: queryParams);
-      _repos = (customResponse.data["items"] as List).map((repo) {
+      _tempRepos = (customResponse.data["items"] as List).map((repo) {
         return Repository.fromMap(repo);
       }).toList();
     } catch (e) {
@@ -62,6 +92,6 @@ class RepositoryViewmodel extends ChangeNotifier {
     }
     _isLoading = false;
     notifyListeners();
-    return;
+    return _tempRepos;
   }
 }

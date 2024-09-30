@@ -19,16 +19,24 @@ class _TrendingReposScreenState extends State<TrendingReposScreen> {
   TimeFilter _selectedTimeframe = TimeFilter.day;
   bool isLoading = true;
   bool _isFilterVisible = false;
+  final ScrollController _scrollController = ScrollController();
+
   @override
   void initState() {
+    final viewmodel = Provider.of<RepositoryViewmodel>(context, listen: false);
+
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      final repositoryViewModel =
-          Provider.of<RepositoryViewmodel>(context, listen: false);
-      await repositoryViewModel.getRepos(TimeFilter.day);
-      setState(() {
-        isLoading = false;
-      });
+      await viewmodel.getRepos(TimeFilter.day);
     });
+
+    _scrollController.addListener(() {
+      if (_scrollController.position.pixels >=
+              _scrollController.position.maxScrollExtent - 200 &&
+          !viewmodel.isLoading) {
+        viewmodel.loadMoreRepos();
+      }
+    });
+
     super.initState();
   }
 
@@ -108,12 +116,27 @@ class _TrendingReposScreenState extends State<TrendingReposScreen> {
                   ),
                 ),
               ),
-              (viewmodel.isLoading || isLoading)
+              (viewmodel.isLoading && viewmodel.repos.isEmpty)
                   ? const Center(child: CircularProgressIndicator())
                   : Expanded(
                       child: ListView.builder(
-                        itemCount: viewmodel.repos!.length,
+                        controller: _scrollController,
+                        itemCount: viewmodel.repos.length +
+                            (viewmodel.isLoading ? 1 : 0),
                         itemBuilder: (BuildContext context, int index) {
+                          if (index == viewmodel.repos.length &&
+                              viewmodel.isLoading) {
+                            return Center(
+                              child: viewmodel.isLoading
+                                  ? Padding(
+                                      padding:
+                                          EdgeInsets.symmetric(vertical: 20.h),
+                                      child: const CircularProgressIndicator(),
+                                    )
+                                  : const SizedBox.shrink(),
+                            );
+                          }
+
                           final repo = viewmodel.repos![index];
 
                           return RepoCard(repo: repo);
