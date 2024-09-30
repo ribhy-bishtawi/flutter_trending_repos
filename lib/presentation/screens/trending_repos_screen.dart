@@ -16,23 +16,22 @@ class TrendingReposScreen extends StatefulWidget {
 }
 
 class _TrendingReposScreenState extends State<TrendingReposScreen> {
-  final dummyRepo = Repository(
-    name: 'AzEnglish',
-    ownerName: 'ribhi_bishtawi',
-    avatarUrl:
-        'https://gravatar.com/avatar/48413b0e4ab8e14df02a6193ecfe887b?s=400&d=robohash&r=x4',
-    description:
-        'A framework for building natively compiled apps A framework for building natively compiled apps',
-    starCount: 12345,
-    language: 'Dart',
-    forksCount: 678,
-    createdAt: DateTime.now(),
-    htmlUrl: 'https://github.com/flutter/flutter',
-  );
+  TimeFilter _selectedTimeframe = TimeFilter.day;
+  bool isLoading = true;
+  @override
+  void initState() {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final repositoryViewModel =
+          Provider.of<RepositoryViewmodel>(context, listen: false);
+      await repositoryViewModel.getRepos(TimeFilter.day);
+      setState(() {
+        isLoading = false;
+      });
+    });
+    super.initState();
+  }
 
-  String _selectedTimeframe = 'day';
-
-  void _onFilterChanged(String timeframe) {
+  void _onFilterChanged(TimeFilter timeframe) {
     setState(() {
       _selectedTimeframe = timeframe;
     });
@@ -40,10 +39,7 @@ class _TrendingReposScreenState extends State<TrendingReposScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<RepositoryViewmodel>(
-      builder: (BuildContext context, RepositoryViewmodel viewmodel,
-              Widget? child) =>
-          Scaffold(
+    return Scaffold(
         appBar: AppBar(
           title: Center(
             child: Text(
@@ -61,46 +57,56 @@ class _TrendingReposScreenState extends State<TrendingReposScreen> {
                 ))
           ],
         ),
-        body: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  _buildFilterButton(
-                    label: 'Last Day',
-                    isSelected: _selectedTimeframe == 'day',
-                    onTap: () {
-                      viewmodel.getRepos();
-                      _onFilterChanged('day');
-                    },
-                  ),
-                  _buildFilterButton(
-                    label: 'Last Week',
-                    isSelected: _selectedTimeframe == 'week',
-                    onTap: () => _onFilterChanged('week'),
-                  ),
-                  _buildFilterButton(
-                    label: 'Last Month',
-                    isSelected: _selectedTimeframe == 'month',
-                    onTap: () => _onFilterChanged('month'),
-                  ),
-                ],
+        body: Consumer<RepositoryViewmodel>(builder: (BuildContext context,
+            RepositoryViewmodel viewmodel, Widget? child) {
+          return Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    _buildFilterButton(
+                      label: 'Last Day',
+                      isSelected: _selectedTimeframe == TimeFilter.day,
+                      onTap: () async {
+                        await viewmodel.getRepos(TimeFilter.day);
+                        _onFilterChanged(TimeFilter.day);
+                      },
+                    ),
+                    _buildFilterButton(
+                        label: 'Last Week',
+                        isSelected: _selectedTimeframe == TimeFilter.week,
+                        onTap: () async {
+                          await viewmodel.getRepos(TimeFilter.week);
+                          _onFilterChanged(TimeFilter.week);
+                        }),
+                    _buildFilterButton(
+                      label: 'Last Month',
+                      isSelected: _selectedTimeframe == TimeFilter.month,
+                      onTap: () async {
+                        _onFilterChanged(TimeFilter.week);
+                        await viewmodel.getRepos(TimeFilter.month);
+                      },
+                    ),
+                  ],
+                ),
               ),
-            ),
-            Expanded(
-              child: ListView.builder(
-                itemCount: 1,
-                itemBuilder: (BuildContext context, int index) {
-                  return RepoCard(repo: dummyRepo);
-                },
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+              (viewmodel.isLoading || isLoading)
+                  ? const Center(child: CircularProgressIndicator())
+                  : Expanded(
+                      child: ListView.builder(
+                        itemCount: viewmodel.repos!.length,
+                        itemBuilder: (BuildContext context, int index) {
+                          final repo = viewmodel.repos![index];
+
+                          return RepoCard(repo: repo);
+                        },
+                      ),
+                    ),
+            ],
+          );
+        }));
   }
 
   Widget _buildFilterButton(
