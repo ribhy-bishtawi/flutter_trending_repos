@@ -1,9 +1,24 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:trending_repositories/core/app_providers.dart'; // Import the providers
+import 'package:trending_repositories/core/app_providers.dart';
+import 'package:trending_repositories/utils/app_strings.dart'; // Import the providers
 
-void main() {
-  runApp(const AppProviders(child: MyApp()));
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await EasyLocalization.ensureInitialized();
+
+  runApp(
+    EasyLocalization(
+      supportedLocales: const [
+        Locale('ar'),
+        Locale('en'),
+      ],
+      path: 'assets/translations',
+      fallbackLocale: const Locale('en'),
+      child: const AppProviders(child: MyApp()),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -21,6 +36,9 @@ class MyApp extends StatelessWidget {
               useMaterial3: true,
             ),
             home: const MainAppContent(),
+            localizationsDelegates: context.localizationDelegates,
+            supportedLocales: context.supportedLocales,
+            locale: context.locale,
           );
         });
   }
@@ -31,9 +49,9 @@ class MainAppContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
+    return Scaffold(
       body: Center(
-        child: Text("test"),
+        child: Text(AppStrings.testTittle),
       ),
     );
   }
