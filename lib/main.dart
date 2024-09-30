@@ -34,8 +34,7 @@ class MyApp extends StatelessWidget {
           return MaterialApp(
             title: 'Flutter Demo',
             theme: ThemeData(
-              scaffoldBackgroundColor:
-                  Palette.whiteColor, // Example background color
+              scaffoldBackgroundColor: Palette.whiteColor,
             ),
             home: const TrendingReposScreen(),
             localizationsDelegates: context.localizationDelegates,
