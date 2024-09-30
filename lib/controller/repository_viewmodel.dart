@@ -18,12 +18,15 @@ class RepositoryViewmodel extends ChangeNotifier {
   List<Repository> _repos = [];
   List<Repository> _favoriteRepos = [];
   List<Repository> _filteredRepos = [];
+  List<Repository> _filteredFavoriteRepos = []; // Filtered favorite repos
 
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
   List<Repository> get repos => _repos;
   List<Repository> get favoriteRepos => _favoriteRepos;
   List<Repository> get filteredRepos => _filteredRepos;
+  List<Repository> get filteredFavoriteRepos => _filteredFavoriteRepos;
+
   int currentPage = 1;
   RepositoryViewmodel() {
     loadFavorites();
@@ -68,6 +71,18 @@ class RepositoryViewmodel extends ChangeNotifier {
           .toList();
     }
     notifyListeners();
+  }
+
+  void searchFavoriteRepos(String query) {
+    if (query.isEmpty) {
+      _filteredFavoriteRepos = _favoriteRepos;
+    } else {
+      _filteredFavoriteRepos = _favoriteRepos
+          .where(
+              (repo) => repo.name.toLowerCase().contains(query.toLowerCase()))
+          .toList();
+    }
+    notifyListeners(); // Notify the UI to update
   }
 
   Future<List<Repository>> fetchRepos(
@@ -121,6 +136,8 @@ class RepositoryViewmodel extends ChangeNotifier {
   Future<void> addToFavorites(Repository repo) async {
     if (!favoriteRepos.contains(repo)) {
       favoriteRepos.add(repo);
+      _filteredFavoriteRepos = _favoriteRepos;
+
       await saveFavorites();
       notifyListeners();
     }
@@ -128,6 +145,8 @@ class RepositoryViewmodel extends ChangeNotifier {
 
   Future<void> removeFromFavorites(Repository repo) async {
     favoriteRepos.remove(repo);
+    _filteredFavoriteRepos = _favoriteRepos;
+
     await saveFavorites();
     notifyListeners();
   }
@@ -146,6 +165,7 @@ class RepositoryViewmodel extends ChangeNotifier {
       _favoriteRepos = favoriteRepoJsonList
           .map((repoJson) => Repository.fromMap(jsonDecode(repoJson)))
           .toList();
+      _filteredFavoriteRepos = _favoriteRepos;
     }
     notifyListeners();
   }

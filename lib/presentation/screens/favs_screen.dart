@@ -19,23 +19,51 @@ class FavoriteReposScreen extends StatelessWidget {
             style: AppTextStyle.headline,
           ),
         ),
-        body: viewmodel.isLoading
-            ? const CircularProgressIndicator()
-            : viewmodel.favoriteRepos.isEmpty
-                ? Center(
-                    child: Text(
-                    "No favorites added yet.",
-                    style: AppTextStyle.headline,
-                  ))
-                : ListView.builder(
-                    itemCount: viewmodel.favoriteRepos.length,
-                    itemBuilder: (context, index) {
-                      final repo = viewmodel.favoriteRepos[index];
-                      return RepoCard(
-                          repo: repo,
-                          key: ObjectKey(viewmodel.favoriteRepos[index]));
-                    },
+        body: Column(
+          children: [
+            if (viewmodel.favoriteRepos.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: TextField(
+                  onChanged: (query) {
+                    viewmodel.searchFavoriteRepos(query); // Filter favorites
+                  },
+                  decoration: InputDecoration(
+                    hintText: 'Search favorites...',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    prefixIcon: Icon(Icons.search),
                   ),
+                ),
+              ),
+            // Favorite Repos List
+            Expanded(
+              child: viewmodel.isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : viewmodel.filteredFavoriteRepos.isEmpty
+                      ? Center(
+                          child: Text(
+                            textAlign: TextAlign.center,
+                            viewmodel.favoriteRepos.isEmpty
+                                ? "No favorites added yet."
+                                : "No repositories found matching your search.",
+                            style: AppTextStyle.headline,
+                          ),
+                        )
+                      : ListView.builder(
+                          itemCount: viewmodel.filteredFavoriteRepos.length,
+                          itemBuilder: (context, index) {
+                            final repo = viewmodel.filteredFavoriteRepos[index];
+                            return RepoCard(
+                              repo: repo,
+                              key: ObjectKey(repo),
+                            );
+                          },
+                        ),
+            ),
+          ],
+        ),
       );
     });
   }
