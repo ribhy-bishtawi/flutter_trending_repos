@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:trending_repositories/data/models/repository_model.dart';
 import 'package:trending_repositories/data/services/api_constants.dart';
 import 'package:trending_repositories/data/services/api_service.dart';
@@ -13,13 +16,17 @@ class RepositoryViewmodel extends ChangeNotifier {
   bool _isLoading = false;
   String? _errorMessage;
   List<Repository> _repos = [];
+  List<Repository> _favoriteRepos = [];
 
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
   List<Repository> get repos => _repos;
+  List<Repository> get favoriteRepos => _favoriteRepos;
 
   int currentPage = 1;
-
+  RepositoryViewmodel() {
+    loadFavorites();
+  }
   Future<void> getRepos(TimeFilter filter) async {
     _isLoading = true;
     _repos = [];
@@ -93,5 +100,42 @@ class RepositoryViewmodel extends ChangeNotifier {
     _isLoading = false;
     notifyListeners();
     return _tempRepos;
+  }
+
+  // Add repository to favorites and save to local storage
+  Future<void> addToFavorites(Repository repo) async {
+    if (!favoriteRepos.contains(repo)) {
+      favoriteRepos.add(repo);
+      await saveFavorites();
+      notifyListeners();
+    }
+  }
+
+  Future<void> removeFromFavorites(Repository repo) async {
+    favoriteRepos.remove(repo);
+    await saveFavorites();
+    notifyListeners();
+  }
+
+  Future<void> saveFavorites() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    List<String> favoriteRepoJsonList =
+        favoriteRepos.map((repo) => jsonEncode(repo.toMap())).toList();
+    await prefs.setStringList('favoriteRepos', favoriteRepoJsonList);
+  }
+
+  Future<void> loadFavorites() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    List<String>? favoriteRepoJsonList = prefs.getStringList('favoriteRepos');
+    if (favoriteRepoJsonList != null) {
+      _favoriteRepos = favoriteRepoJsonList
+          .map((repoJson) => Repository.fromMap(jsonDecode(repoJson)))
+          .toList();
+    }
+    notifyListeners();
+  }
+
+  bool isFavorite(Repository repo) {
+    return favoriteRepos.contains(repo);
   }
 }

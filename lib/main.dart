@@ -2,6 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:trending_repositories/core/app_providers.dart';
+import 'package:trending_repositories/presentation/screens/favs_screen.dart';
 import 'package:trending_repositories/presentation/screens/trending_repos_screen.dart';
 import 'package:trending_repositories/utils/app_strings.dart';
 import 'package:trending_repositories/utils/palette.dart'; // Import the providers
@@ -37,10 +38,14 @@ class MyApp extends StatelessWidget {
             theme: ThemeData(
               scaffoldBackgroundColor: Palette.whiteColor,
             ),
-            home: const TrendingReposScreen(),
             localizationsDelegates: context.localizationDelegates,
             supportedLocales: context.supportedLocales,
             locale: context.locale,
+            routes: {
+              '/': (context) => const TrendingReposScreen(),
+              '/fav': (context) => FavoriteReposScreen(),
+            },
+            initialRoute: '/',
           );
         });
   }

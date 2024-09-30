@@ -20,11 +20,11 @@ class _TrendingReposScreenState extends State<TrendingReposScreen> {
   bool isLoading = true;
   bool _isFilterVisible = false;
   final ScrollController _scrollController = ScrollController();
-
+  int favCount = 0;
   @override
   void initState() {
     final viewmodel = Provider.of<RepositoryViewmodel>(context, listen: false);
-
+    favCount = viewmodel.favoriteRepos.length;
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await viewmodel.getRepos(TimeFilter.day);
     });
@@ -48,38 +48,66 @@ class _TrendingReposScreenState extends State<TrendingReposScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-          title: Text(
-            "Trending Repositories",
-            style: AppTextStyle.headline,
-          ),
-          forceMaterialTransparency: true,
-          elevation: 0,
-          centerTitle: true,
-          leading: IconButton(
-              onPressed: () {
-                setState(() {
-                  _isFilterVisible = !_isFilterVisible;
-                });
-              },
-              icon: Icon(
-                Icons.filter_list_rounded,
-                color: Palette.iconColor,
-                size: Constants.iconSizeWidth30,
-              )),
-          actions: [
-            IconButton(
-                onPressed: () {},
-                icon: const Icon(
-                  Icons.favorite,
+    return Consumer<RepositoryViewmodel>(builder:
+        (BuildContext context, RepositoryViewmodel viewmodel, Widget? child) {
+      return Scaffold(
+          appBar: AppBar(
+            title: Text(
+              "Trending Repositories",
+              style: AppTextStyle.headline,
+            ),
+            forceMaterialTransparency: true,
+            elevation: 0,
+            centerTitle: true,
+            leading: IconButton(
+                onPressed: () {
+                  setState(() {
+                    _isFilterVisible = !_isFilterVisible;
+                  });
+                },
+                icon: Icon(
+                  Icons.filter_list_rounded,
                   color: Palette.iconColor,
-                ))
-          ],
-        ),
-        body: Consumer<RepositoryViewmodel>(builder: (BuildContext context,
-            RepositoryViewmodel viewmodel, Widget? child) {
-          return Column(
+                  size: Constants.iconSizeWidth30,
+                )),
+            actions: [
+              Stack(
+                children: [
+                  IconButton.filledTonal(
+                    style: ButtonStyle(
+                      backgroundColor:
+                          WidgetStateProperty.all(Palette.red), // Button color
+                    ),
+                    color: Palette.whiteColor, // Icon color
+                    onPressed: () {
+                      Navigator.pushNamed(context, '/fav');
+                    },
+                    icon: const Icon(Icons.favorite_border),
+                  ),
+                  Positioned(
+                    right: 0,
+                    top: 0,
+                    child: Container(
+                      padding: EdgeInsets.all(4.r),
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Text(
+                        "${viewmodel.favoriteRepos.length}",
+                        style: TextStyle(
+                          color: Colors.red,
+                          fontSize: 12.sp,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              )
+            ],
+          ),
+          body: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Visibility(
@@ -144,8 +172,8 @@ class _TrendingReposScreenState extends State<TrendingReposScreen> {
                       ),
                     ),
             ],
-          );
-        }));
+          ));
+    });
   }
 
   Widget _buildFilterButton(

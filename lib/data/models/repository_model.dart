@@ -33,4 +33,35 @@ class Repository {
       htmlUrl: map['html_url'] ?? '',
     );
   }
+  Map<String, dynamic> toMap() {
+    return {
+      'name': name,
+      'owner': {
+        'login': ownerName,
+        'avatar_url': avatarUrl,
+      },
+      'description': description,
+      'stargazers_count': starCount,
+      'language': language,
+      'forks_count': forksCount,
+      'created_at': createdAt.toIso8601String(),
+      'html_url': htmlUrl,
+    };
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! Repository) return false;
+
+    return name == other.name &&
+        ownerName == other.ownerName &&
+        avatarUrl == other.avatarUrl &&
+        description == other.description &&
+        starCount == other.starCount &&
+        language == other.language &&
+        forksCount == other.forksCount &&
+        createdAt == other.createdAt &&
+        htmlUrl == other.htmlUrl;
+  }
 }

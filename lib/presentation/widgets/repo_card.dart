@@ -1,6 +1,8 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:provider/provider.dart';
+import 'package:trending_repositories/controller/repository_viewmodel.dart';
 import 'package:trending_repositories/data/models/repository_model.dart';
 import 'package:trending_repositories/utils/constants.dart';
 import 'package:trending_repositories/utils/palette.dart';
@@ -26,6 +28,9 @@ class _RepoCardState extends State<RepoCard> {
 
   @override
   Widget build(BuildContext context) {
+    final viewmodel = Provider.of<RepositoryViewmodel>(context);
+    bool isFavored = viewmodel.isFavorite(repo);
+
     return SizedBox(
       child: Card(
         elevation: 3,
@@ -122,9 +127,11 @@ class _RepoCardState extends State<RepoCard> {
                   height: 30.w,
                 ),
                 onPressed: () {
-                  setState(() {
-                    isFavored = !isFavored;
-                  });
+                  if (isFavored) {
+                    viewmodel.removeFromFavorites(repo);
+                  } else {
+                    viewmodel.addToFavorites(repo);
+                  }
                 },
               ),
             )

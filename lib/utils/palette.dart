@@ -12,4 +12,5 @@ class Palette {
   static const Color text = Color(0xFFD8DCE8);
   static const Color secondaryText = Color(0xFF8B8D98);
   static const Color header = Color(0xFF363845);
+  static const Color red = Color(0xFFFF3A59);
 }
