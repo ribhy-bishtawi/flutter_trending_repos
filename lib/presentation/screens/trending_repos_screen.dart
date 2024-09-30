@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:provider/provider.dart';
+import 'package:trending_repositories/controller/repository_viewmodel.dart';
 import 'package:trending_repositories/data/models/repository_model.dart';
 import 'package:trending_repositories/presentation/widgets/repo_card.dart';
 import 'package:trending_repositories/utils/constants.dart';
@@ -38,58 +40,65 @@ class _TrendingReposScreenState extends State<TrendingReposScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Center(
-          child: Text(
-            "Trending Repositories",
-            style: AppTextStyle.headline,
+    return Consumer<RepositoryViewmodel>(
+      builder: (BuildContext context, RepositoryViewmodel viewmodel,
+              Widget? child) =>
+          Scaffold(
+        appBar: AppBar(
+          title: Center(
+            child: Text(
+              "Trending Repositories",
+              style: AppTextStyle.headline,
+            ),
           ),
+          backgroundColor: Palette.primaryColor,
+          actions: [
+            IconButton(
+                onPressed: () {},
+                icon: const Icon(
+                  Icons.favorite,
+                  color: Palette.whiteColor,
+                ))
+          ],
         ),
-        backgroundColor: Palette.primaryColor,
-        actions: [
-          IconButton(
-              onPressed: () {},
-              icon: const Icon(
-                Icons.favorite,
-                color: Palette.whiteColor,
-              ))
-        ],
-      ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                _buildFilterButton(
-                  label: 'Last Day',
-                  isSelected: _selectedTimeframe == 'day',
-                  onTap: () => _onFilterChanged('day'),
-                ),
-                _buildFilterButton(
-                  label: 'Last Week',
-                  isSelected: _selectedTimeframe == 'week',
-                  onTap: () => _onFilterChanged('week'),
-                ),
-                _buildFilterButton(
-                  label: 'Last Month',
-                  isSelected: _selectedTimeframe == 'month',
-                  onTap: () => _onFilterChanged('month'),
-                ),
-              ],
+        body: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  _buildFilterButton(
+                    label: 'Last Day',
+                    isSelected: _selectedTimeframe == 'day',
+                    onTap: () {
+                      viewmodel.getRepos();
+                      _onFilterChanged('day');
+                    },
+                  ),
+                  _buildFilterButton(
+                    label: 'Last Week',
+                    isSelected: _selectedTimeframe == 'week',
+                    onTap: () => _onFilterChanged('week'),
+                  ),
+                  _buildFilterButton(
+                    label: 'Last Month',
+                    isSelected: _selectedTimeframe == 'month',
+                    onTap: () => _onFilterChanged('month'),
+                  ),
+                ],
+              ),
             ),
-          ),
-          Expanded(
-            child: ListView.builder(
-              itemCount: 1,
-              itemBuilder: (BuildContext context, int index) {
-                return RepoCard(repo: dummyRepo);
-              },
+            Expanded(
+              child: ListView.builder(
+                itemCount: 1,
+                itemBuilder: (BuildContext context, int index) {
+                  return RepoCard(repo: dummyRepo);
+                },
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
