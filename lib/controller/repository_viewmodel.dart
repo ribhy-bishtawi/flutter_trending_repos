@@ -17,40 +17,56 @@ class RepositoryViewmodel extends ChangeNotifier {
   String? _errorMessage;
   List<Repository> _repos = [];
   List<Repository> _favoriteRepos = [];
+  List<Repository> _filteredRepos = [];
 
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
   List<Repository> get repos => _repos;
   List<Repository> get favoriteRepos => _favoriteRepos;
-
+  List<Repository> get filteredRepos => _filteredRepos;
   int currentPage = 1;
   RepositoryViewmodel() {
     loadFavorites();
   }
   Future<void> getRepos(TimeFilter filter) async {
     _isLoading = true;
-    _repos = [];
+    _filteredRepos = [];
     notifyListeners();
 
-    _repos = await fetchRepos(page: 1, filter: filter);
+    List<Repository> newRepos = await fetchRepos(page: 1, filter: filter);
     currentPage = 1;
+    _repos = newRepos;
+
+    _filteredRepos = _repos;
     _isLoading = false;
     notifyListeners();
   }
 
-  Future<void> loadMoreRepos() async {
+  Future<void> loadMoreRepos(TimeFilter filter) async {
     if (_isLoading) return;
 
     _isLoading = true;
     notifyListeners();
     List<Repository> moreRepos =
-        await fetchRepos(page: currentPage + 1, filter: TimeFilter.day);
+        await fetchRepos(page: currentPage + 1, filter: filter);
     if (moreRepos.isNotEmpty) {
       repos.addAll(moreRepos);
       currentPage++;
     }
-
+    _filteredRepos = repos;
     _isLoading = false;
+    notifyListeners();
+  }
+
+  void searchRepos(String query) {
+    if (query.isEmpty) {
+      _filteredRepos = repos;
+    } else {
+      _filteredRepos = repos
+          .where(
+              (repo) => repo.name.toLowerCase().contains(query.toLowerCase()))
+          .toList();
+    }
     notifyListeners();
   }
 
@@ -83,7 +99,7 @@ class RepositoryViewmodel extends ChangeNotifier {
       'sort': 'stars',
       'order': 'desc',
       'q': 'created:>$createdSince',
-      'page': page
+      'page': page,
     };
     const String url = ApiConstants.baseUrl + ApiConstants.searchRepositories;
 
@@ -102,7 +118,6 @@ class RepositoryViewmodel extends ChangeNotifier {
     return _tempRepos;
   }
 
-  // Add repository to favorites and save to local storage
   Future<void> addToFavorites(Repository repo) async {
     if (!favoriteRepos.contains(repo)) {
       favoriteRepos.add(repo);

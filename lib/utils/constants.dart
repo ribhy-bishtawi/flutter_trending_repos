@@ -7,7 +7,7 @@ class Constants {
   static final gapW16 = SizedBox(width: 16.w);
   static final gapW4 = SizedBox(width: 4.w);
   static final gapH8 = SizedBox(height: 8.h);
-
+  static final gapH16 = SizedBox(height: 16.h);
   static final borderRadius8 = BorderRadius.circular(8.0.r);
 
   static final paddingAll16 = EdgeInsets.all(16.w);

@@ -21,6 +21,8 @@ class _TrendingReposScreenState extends State<TrendingReposScreen> {
   bool _isFilterVisible = false;
   final ScrollController _scrollController = ScrollController();
   int favCount = 0;
+  final TextEditingController _searchQueryController = TextEditingController();
+
   @override
   void initState() {
     final viewmodel = Provider.of<RepositoryViewmodel>(context, listen: false);
@@ -33,7 +35,7 @@ class _TrendingReposScreenState extends State<TrendingReposScreen> {
       if (_scrollController.position.pixels >=
               _scrollController.position.maxScrollExtent - 200 &&
           !viewmodel.isLoading) {
-        viewmodel.loadMoreRepos();
+        viewmodel.loadMoreRepos(_selectedTimeframe);
       }
     });
 
@@ -114,45 +116,64 @@ class _TrendingReposScreenState extends State<TrendingReposScreen> {
                 visible: _isFilterVisible,
                 child: Padding(
                   padding: EdgeInsets.all(16.0.r),
-                  child: Wrap(
-                    spacing: 8.0.w,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _buildFilterButton(
-                        label: 'Last Day',
-                        isSelected: _selectedTimeframe == TimeFilter.day,
-                        onTap: () async {
-                          await viewmodel.getRepos(TimeFilter.day);
-                          _onFilterChanged(TimeFilter.day);
+                      TextField(
+                        controller: _searchQueryController,
+                        onChanged: (query) {
+                          viewmodel.searchRepos(query);
                         },
+                        decoration: InputDecoration(
+                          hintText: 'Search repositories...',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(20.r),
+                          ),
+                          prefixIcon: const Icon(Icons.search),
+                        ),
                       ),
-                      _buildFilterButton(
-                          label: 'Last Week',
-                          isSelected: _selectedTimeframe == TimeFilter.week,
-                          onTap: () async {
-                            await viewmodel.getRepos(TimeFilter.week);
-                            _onFilterChanged(TimeFilter.week);
-                          }),
-                      _buildFilterButton(
-                        label: 'Last Month',
-                        isSelected: _selectedTimeframe == TimeFilter.month,
-                        onTap: () async {
-                          _onFilterChanged(TimeFilter.month);
-                          await viewmodel.getRepos(TimeFilter.month);
-                        },
+                      Constants.gapH16,
+                      Wrap(
+                        spacing: 8.0.w,
+                        children: [
+                          _buildFilterButton(
+                            label: 'Last Day',
+                            isSelected: _selectedTimeframe == TimeFilter.day,
+                            onTap: () async {
+                              await viewmodel.getRepos(TimeFilter.day);
+                              _onFilterChanged(TimeFilter.day);
+                            },
+                          ),
+                          _buildFilterButton(
+                              label: 'Last Week',
+                              isSelected: _selectedTimeframe == TimeFilter.week,
+                              onTap: () async {
+                                await viewmodel.getRepos(TimeFilter.week);
+                                _onFilterChanged(TimeFilter.week);
+                              }),
+                          _buildFilterButton(
+                            label: 'Last Month',
+                            isSelected: _selectedTimeframe == TimeFilter.month,
+                            onTap: () async {
+                              _onFilterChanged(TimeFilter.month);
+                              await viewmodel.getRepos(TimeFilter.month);
+                            },
+                          ),
+                        ],
                       ),
                     ],
                   ),
                 ),
               ),
-              (viewmodel.isLoading && viewmodel.repos.isEmpty)
+              (viewmodel.isLoading && viewmodel.filteredRepos.isEmpty)
                   ? const Center(child: CircularProgressIndicator())
                   : Expanded(
                       child: ListView.builder(
                         controller: _scrollController,
-                        itemCount: viewmodel.repos.length +
+                        itemCount: viewmodel.filteredRepos.length +
                             (viewmodel.isLoading ? 1 : 0),
                         itemBuilder: (BuildContext context, int index) {
-                          if (index == viewmodel.repos.length &&
+                          if (index == viewmodel.filteredRepos.length &&
                               viewmodel.isLoading) {
                             return Center(
                               child: viewmodel.isLoading
@@ -165,9 +186,10 @@ class _TrendingReposScreenState extends State<TrendingReposScreen> {
                             );
                           }
 
-                          final repo = viewmodel.repos![index];
-
-                          return RepoCard(repo: repo);
+                          final repo = viewmodel.filteredRepos[index];
+                          return RepoCard(
+                              repo: repo,
+                              key: ObjectKey(viewmodel.filteredRepos[index]));
                         },
                       ),
                     ),

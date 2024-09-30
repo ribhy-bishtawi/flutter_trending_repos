@@ -48,6 +48,7 @@ class NetworkHelper {
 
   void _setJsonHeader() {
     headers.putIfAbsent('Accept', () => 'application/json');
+    headers.putIfAbsent('Authorization', () => 'Bearer ');
   }
 
   /// Handles GET requests and returns a [CustomResponse].
@@ -60,7 +61,9 @@ class NetworkHelper {
     String? errorMessage;
 
     try {
-      response = await _dio.get(url, queryParameters: queryParameters);
+      _setJsonHeader();
+      response = await _dio.get(url,
+          queryParameters: queryParameters, options: Options(headers: headers));
 
       ErrorType errorType = ErrorHelper.getErrorType(response.statusCode);
 
