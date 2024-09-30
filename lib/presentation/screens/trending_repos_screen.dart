@@ -18,6 +18,7 @@ class TrendingReposScreen extends StatefulWidget {
 class _TrendingReposScreenState extends State<TrendingReposScreen> {
   TimeFilter _selectedTimeframe = TimeFilter.day;
   bool isLoading = true;
+  bool _isFilterVisible = false;
   @override
   void initState() {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
@@ -41,55 +42,70 @@ class _TrendingReposScreenState extends State<TrendingReposScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Center(
-            child: Text(
-              "Trending Repositories",
-              style: AppTextStyle.headline,
-            ),
+          title: Text(
+            "Trending Repositories",
+            style: AppTextStyle.headline,
           ),
-          backgroundColor: Palette.primaryColor,
+          forceMaterialTransparency: true,
+          elevation: 0,
+          centerTitle: true,
+          leading: IconButton(
+              onPressed: () {
+                setState(() {
+                  _isFilterVisible = !_isFilterVisible;
+                });
+              },
+              icon: Icon(
+                Icons.filter_list_rounded,
+                color: Palette.iconColor,
+                size: Constants.iconSizeWidth30,
+              )),
           actions: [
             IconButton(
                 onPressed: () {},
                 icon: const Icon(
                   Icons.favorite,
-                  color: Palette.whiteColor,
+                  color: Palette.iconColor,
                 ))
           ],
         ),
         body: Consumer<RepositoryViewmodel>(builder: (BuildContext context,
             RepositoryViewmodel viewmodel, Widget? child) {
           return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    _buildFilterButton(
-                      label: 'Last Day',
-                      isSelected: _selectedTimeframe == TimeFilter.day,
-                      onTap: () async {
-                        await viewmodel.getRepos(TimeFilter.day);
-                        _onFilterChanged(TimeFilter.day);
-                      },
-                    ),
-                    _buildFilterButton(
-                        label: 'Last Week',
-                        isSelected: _selectedTimeframe == TimeFilter.week,
+              Visibility(
+                visible: _isFilterVisible,
+                child: Padding(
+                  padding: EdgeInsets.all(16.0.r),
+                  child: Wrap(
+                    spacing: 8.0.w,
+                    children: [
+                      _buildFilterButton(
+                        label: 'Last Day',
+                        isSelected: _selectedTimeframe == TimeFilter.day,
                         onTap: () async {
-                          await viewmodel.getRepos(TimeFilter.week);
-                          _onFilterChanged(TimeFilter.week);
-                        }),
-                    _buildFilterButton(
-                      label: 'Last Month',
-                      isSelected: _selectedTimeframe == TimeFilter.month,
-                      onTap: () async {
-                        _onFilterChanged(TimeFilter.week);
-                        await viewmodel.getRepos(TimeFilter.month);
-                      },
-                    ),
-                  ],
+                          await viewmodel.getRepos(TimeFilter.day);
+                          _onFilterChanged(TimeFilter.day);
+                        },
+                      ),
+                      _buildFilterButton(
+                          label: 'Last Week',
+                          isSelected: _selectedTimeframe == TimeFilter.week,
+                          onTap: () async {
+                            await viewmodel.getRepos(TimeFilter.week);
+                            _onFilterChanged(TimeFilter.week);
+                          }),
+                      _buildFilterButton(
+                        label: 'Last Month',
+                        isSelected: _selectedTimeframe == TimeFilter.month,
+                        onTap: () async {
+                          _onFilterChanged(TimeFilter.month);
+                          await viewmodel.getRepos(TimeFilter.month);
+                        },
+                      ),
+                    ],
+                  ),
                 ),
               ),
               (viewmodel.isLoading || isLoading)
@@ -113,24 +129,26 @@ class _TrendingReposScreenState extends State<TrendingReposScreen> {
       {required String label,
       required bool isSelected,
       required VoidCallback onTap}) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
+    return OutlinedButton(
+      onPressed: () {
+        onTap();
+      },
+      style: OutlinedButton.styleFrom(
+        minimumSize: Size(50.w, 30.h),
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
         padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 16.w),
-        decoration: BoxDecoration(
-          color: isSelected ? Palette.primaryColor : Colors.grey[300],
-          borderRadius: Constants.borderRadius8,
-          border: Border.all(
-            color: isSelected ? Palette.primaryColor : Colors.grey,
-            width: 2,
-          ),
+        backgroundColor: isSelected ? Palette.primaryColor : null,
+        side: BorderSide(
+          color: isSelected ? Palette.primaryColor : Colors.grey,
+          width: 1,
         ),
-        child: Text(
-          label,
-          style: TextStyle(
-            color: isSelected ? Palette.whiteColor : Palette.header,
-            fontWeight: FontWeight.bold,
-          ),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 12.sp,
+          color: isSelected ? Palette.whiteColor : Palette.blackColor,
+          fontWeight: FontWeight.bold,
         ),
       ),
     );

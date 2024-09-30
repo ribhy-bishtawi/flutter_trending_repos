@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:trending_repositories/core/app_providers.dart';
 import 'package:trending_repositories/presentation/screens/trending_repos_screen.dart';
-import 'package:trending_repositories/utils/app_strings.dart'; // Import the providers
+import 'package:trending_repositories/utils/app_strings.dart';
+import 'package:trending_repositories/utils/palette.dart'; // Import the providers
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -33,8 +34,8 @@ class MyApp extends StatelessWidget {
           return MaterialApp(
             title: 'Flutter Demo',
             theme: ThemeData(
-              colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-              useMaterial3: true,
+              scaffoldBackgroundColor:
+                  Palette.whiteColor, // Example background color
             ),
             home: const TrendingReposScreen(),
             localizationsDelegates: context.localizationDelegates,

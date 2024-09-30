@@ -11,8 +11,7 @@ class Constants {
   static final borderRadius8 = BorderRadius.circular(8.0.r);
 
   static final paddingAll16 = EdgeInsets.all(16.w);
-
-  static final iconSizeWidth20 = 20.w;
+  static final iconSizeWidth30 = 30.w;
 
   static final marginVertical8Horizontal16 =
       EdgeInsets.symmetric(vertical: 8.h, horizontal: 16.w);

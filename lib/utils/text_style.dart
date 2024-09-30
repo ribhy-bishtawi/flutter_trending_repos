@@ -6,7 +6,7 @@ class AppTextStyle {
   static TextStyle headline = TextStyle(
     fontSize: 24.0.sp,
     fontWeight: FontWeight.bold,
-    color: Palette.whiteColor,
+    color: Palette.header,
   );
 
   static TextStyle primaryText = TextStyle(
