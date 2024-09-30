@@ -2,6 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:trending_repositories/core/app_providers.dart';
+import 'package:trending_repositories/presentation/screens/trending_repos_screen.dart';
 import 'package:trending_repositories/utils/app_strings.dart'; // Import the providers
 
 void main() async {
@@ -35,7 +36,7 @@ class MyApp extends StatelessWidget {
               colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
               useMaterial3: true,
             ),
-            home: const MainAppContent(),
+            home: const TrendingReposScreen(),
             localizationsDelegates: context.localizationDelegates,
             supportedLocales: context.supportedLocales,
             locale: context.locale,
