@@ -70,7 +70,7 @@ lib/
 
 - **Tablet UI Support**: The app is fully responsive and works well on both larger and smaller screens. However, need more adjustments to fine-tune the layout.
 - **Unit Tests**: Additional testing, especially on ViewModel classes and network services, would enhance the app’s robustness.
--**Use of sqflite Instead of shared_preferences**: While the current use of shared_preferences is efficient for small to moderately sized lists (e.g., a few repositories), for larger datasets, this approach may become less efficient.
+- **Use of sqflite Instead of shared_preferences**: While the current use of shared_preferences is efficient for small to moderately sized lists (e.g., a few repositories), for larger datasets, this approach may become less efficient.
   
 ## Final Notes
 
