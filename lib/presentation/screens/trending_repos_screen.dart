@@ -76,6 +76,8 @@ class _TrendingReposScreenState extends State<TrendingReposScreen> {
               Stack(
                 children: [
                   IconButton.filledTonal(
+                    padding: EdgeInsets.all(4.r),
+                    iconSize: Constants.iconSizeWidth30,
                     style: ButtonStyle(
                       backgroundColor:
                           WidgetStateProperty.all(Palette.red), // Button color
@@ -84,7 +86,10 @@ class _TrendingReposScreenState extends State<TrendingReposScreen> {
                     onPressed: () {
                       Navigator.pushNamed(context, '/fav');
                     },
-                    icon: const Icon(Icons.favorite_border),
+                    icon: Icon(
+                      Icons.favorite_border,
+                      size: Constants.iconSizeWidth30,
+                    ),
                   ),
                   Positioned(
                     right: 0,
