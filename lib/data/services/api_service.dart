@@ -48,7 +48,6 @@ class NetworkHelper {
 
   void _setJsonHeader() {
     headers.putIfAbsent('Accept', () => 'application/json');
-    headers.putIfAbsent('Authorization', () => 'Bearer ');
   }
 
   /// Handles GET requests and returns a [CustomResponse].
